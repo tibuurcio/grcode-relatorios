@@ -1,0 +1,16 @@
+{
+  "name": "grcode-relatorios",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "parcel src/individual.html",
+    "build": "parcel build src/individual.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jquery": "^3.5.32",
+    "parcel": "^2.13.3"
+  }
+}
