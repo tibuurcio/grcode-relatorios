@@ -5,7 +5,13 @@ import { Data } from "./types";
 // Comment for disabling cache
 import * as response from "./data.json";
 import { AparelhoLabels, ColunaLabels } from "./labels";
-import { mapToOptions, groupByKey, twoLevels } from "./utils";
+import {
+  mapToOptions,
+  groupByKey,
+  twoLevels,
+  groupByTwoKeys,
+  TwoKeysDivider,
+} from "./utils";
 
 const { baseUrl, slug } = window.gCodeConfigs;
 
@@ -15,7 +21,9 @@ $(function () {
   const selectCategoria = document.querySelector("#select_categoria");
   const selectNivel = document.querySelector("#select_nivel");
 
-  const tabelaRelatorio = document.querySelector("#grcode_relatorios_table");
+  const tabelaRelatorio: HTMLTableElement =
+    document.querySelector("#grcode_relatorios_table") ??
+    document.createElement("table");
 
   let dadosProcessados;
   let categoriaAtual;
@@ -76,6 +84,13 @@ $(function () {
     data.forEach((row) => {
       row.categoria_ordem = Number(row.categoria_ordem);
       row.categoria_nivel = Number(row.categoria_nivel);
+      [
+        "nome",
+        "clube",
+        "categoria_nome",
+        "categoria_descricao",
+        "categoria_nivel_group",
+      ].forEach((key) => (row[key] = row[key].trim()));
     });
 
     const groupedByClasse = groupByKey(data, "classe");
@@ -136,26 +151,31 @@ $(function () {
       dadosProcessados.groupedByCategoriaNivel[classe][categoria][nivel];
 
     const aparelhosDisponiveis = new Set(data.map((row) => row.aparelho));
-    console.log("Aparelhos disponíveis:", aparelhosDisponiveis);
 
-    const processedData = Object.keys(groupByKey(data, "nome")).map((nome) => {
-      const rows = groupByKey(data, "nome")[nome];
-      const nota_total = rows.reduce((acc, row) => acc + row.nota_final, 0);
+    const groupedByNameAndClube = groupByTwoKeys(data, "nome", "clube");
 
-      return {
-        nome,
-        clube: rows[0].clube,
-        aparelhos: rows.map((row) => ({
-          aparelho: row.aparelho,
-          nota_tot_dbda: row.nota_tot_dbda,
-          nota_tot_art: row.nota_tot_art,
-          nota_tot_exe: row.nota_tot_exe,
-          nota_tot_ded: row.nota_tot_ded,
-          nota_final: row.nota_final,
-        })),
-        nota_total,
-      };
-    });
+    const processedData = Object.keys(groupedByNameAndClube).map(
+      (nomeAndClube) => {
+        const rows = groupedByNameAndClube[nomeAndClube];
+        const nota_total = rows.reduce((acc, row) => acc + row.nota_final, 0);
+
+        const [nome, clube] = nomeAndClube.split(TwoKeysDivider);
+
+        return {
+          nome,
+          clube,
+          aparelhos: rows.map((row) => ({
+            aparelho: row.aparelho,
+            nota_tot_dbda: row.nota_tot_dbda,
+            nota_tot_art: row.nota_tot_art,
+            nota_tot_exe: row.nota_tot_exe,
+            nota_tot_ded: row.nota_tot_ded,
+            nota_final: row.nota_final,
+          })),
+          nota_total,
+        };
+      }
+    );
 
     console.log({
       data,
@@ -213,7 +233,6 @@ $(function () {
     const tbody = tabelaRelatorio.querySelector("tbody");
 
     const avg = (arr) => arr.reduce((acc, val) => acc + val, 0) / arr.length;
-    // TODO: sort by aparelhos tbm, soma da execução
     processedData.sort((a, b) => {
       if (b.nota_total === a.nota_total) {
         return (
@@ -272,10 +291,6 @@ $(function () {
     recarregarDataTables(colunas);
   }
 
-  function formatNumber(value) {
-    return typeof value === "number" ? value.toFixed(2) : value;
-  }
-
   function setTablePorAparelho() {
     const classe = selectClasse.value;
     const categoria = categoriaAtual;
@@ -284,8 +299,6 @@ $(function () {
       return;
     }
 
-    // id, nome, clube, aparelho, nota_tot_dbda, nota_tot_art, nota_tot_exe, nota_tot_ded, nota_final
-    // create columns in the table header for the columns above. Use the Colunas object to get the column names
     const colunas = [
       "index",
       "nome",
@@ -306,6 +319,8 @@ $(function () {
       "nota_final",
     ]);
 
+    const tableHeader = tabelaRelatorio.querySelector("thead");
+
     colunas.forEach((coluna) => {
       const th = document.createElement("th");
       th.textContent = ColunaLabels[coluna];
@@ -315,22 +330,10 @@ $(function () {
     const dados =
       dadosProcessados.groupedByCategoriaDescricao[classe][categoria];
 
+    const tableBody = tabelaRelatorio.querySelector("tbody");
+
     dados.sort(sortData);
-    dados.forEach(populateData(dados, colunas));
-
-    recarregarDataTables(colunas);
-  }
-
-  function sortData(a, b) {
-    if (b.nota_final === a.nota_final) {
-      return b.nota_tot_exe - a.nota_tot_exe;
-    }
-
-    return b.nota_final - a.nota_final;
-  }
-
-  function populateData(dados, colunas) {
-    return function (data, index) {
+    dados.forEach((data, index) => {
       data.index = index + 1;
       const row = document.createElement("tr");
       colunas.forEach((coluna) => {
@@ -348,9 +351,20 @@ $(function () {
         row.appendChild(cell);
       });
 
-      tabelaRelatorio.querySelector("tbody").appendChild(row);
-    };
+      tableBody.appendChild(row);
+    });
+
+    recarregarDataTables(colunas);
   }
+
+  function sortData(a, b) {
+    if (b.nota_final === a.nota_final) {
+      return b.nota_tot_exe - a.nota_tot_exe;
+    }
+
+    return b.nota_final - a.nota_final;
+  }
+
   /** Handle async data */
 
   function recarregarDataTables(colunas) {
@@ -489,5 +503,9 @@ $(function () {
       limparTabela();
       setTableGeral();
     }
+  }
+
+  function formatNumber(value) {
+    return typeof value === "number" ? value.toFixed(2) : value;
   }
 });
