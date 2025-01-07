@@ -207,26 +207,26 @@ $(function () {
         <th rowspan="2" class="align-middle">Nome</th>
         <th rowspan="2" class="align-middle">Clube</th>
         ${[...aparelhosDisponiveis]
-          .map(
-            (aparelho) =>
-              `<th colspan="5" data-dt-order="disable" class="text-center">${AparelhoLabels[aparelho]}</th>`
-          )
-          .join("")}
+        .map(
+          (aparelho) =>
+            `<th colspan="5" data-dt-order="disable" class="text-center">${AparelhoLabels[aparelho]}</th>`
+        )
+        .join("")}
         <th rowspan="2" class="align-middle">Nota Total</th>
       </tr>
       <tr>
         ${[...aparelhosDisponiveis]
-          .map(
-            () =>
-              `
+        .map(
+          () =>
+            `
                 <th data-dt-order="disable">D</th>
                 <th data-dt-order="disable">A</th>
                 <th data-dt-order="disable">E</th>
                 <th data-dt-order="disable">Ded</th>
                 <th>Tot</th>
               `
-          )
-          .join("")}
+        )
+        .join("")}
       </tr>
     `;
 
@@ -321,14 +321,22 @@ $(function () {
 
     const tableHeader = tabelaRelatorio.querySelector("thead");
 
+    if (!tableHeader) return;
+
+    tableHeader.innerHTML = "";
+    const headerRow = document.createElement("tr");
+    tableHeader.appendChild(headerRow);
+
     colunas.forEach((coluna) => {
       const th = document.createElement("th");
       th.textContent = ColunaLabels[coluna];
-      tableHeader.appendChild(th);
+      headerRow.appendChild(th);
     });
 
     const dados =
       dadosProcessados.groupedByCategoriaDescricao[classe][categoria];
+
+    console.log({ dados, colunas });
 
     const tableBody = tabelaRelatorio.querySelector("tbody");
 
@@ -488,7 +496,7 @@ $(function () {
       } else if (!!relatorio && relatorio === "GERAL") {
         const niveis = Object.keys(
           dadosProcessados.groupedByCategoriaNivel[selectClasse.value][
-            categoriaAtual
+          categoriaAtual
           ]
         );
 
