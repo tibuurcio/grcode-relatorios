@@ -1,10 +1,11 @@
 // https://grdesportiva.bubbleapps.io/version-test/api/1.1/meta/swagger.json
 
 import { Data } from "./types";
+// import * as _imgs from "./imgs/*.png";
 
 // Comment for disabling cache
 import * as response from "./data.json";
-import { AparelhoLabels, ColunaLabels } from "./labels";
+import { AparelhoImgs, AparelhoLabels, ColunaLabels } from "./labels";
 import {
   mapToOptions,
   groupByKey,
@@ -209,7 +210,9 @@ $(function () {
         ${[...aparelhosDisponiveis]
         .map(
           (aparelho) =>
-            `<th colspan="5" data-dt-order="disable" class="text-center">${AparelhoLabels[aparelho]}</th>`
+            `<th colspan="5" data-dt-order="disable" class="text-center" data-aparelho="${aparelho}">
+              ${AparelhoLabels[aparelho]}
+            </th>`
         )
         .join("")}
         <th rowspan="2" class="align-middle">Nota Total</th>
@@ -229,6 +232,14 @@ $(function () {
         .join("")}
       </tr>
     `;
+
+    // TODO add imagens dos aparelhos
+    // document.querySelectorAll("th[data-aparelho]").forEach((th) => {
+    //   const aparelho = th.getAttribute("data-aparelho");
+    //   let img = document.createElement('img');
+    //   img.src = new URL(AparelhoImgs[aparelho], import.meta.url).toString();
+    //   th.appendChild(img);
+    // })
 
     const tbody = tabelaRelatorio.querySelector("tbody");
 

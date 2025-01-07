@@ -11,11 +11,11 @@ export const ColunaLabels = {
   estagio: "Estagio",
   nota_da1: "Nota Da1",
   nota_db1: "Nota Db1",
-  nota_tot_dbda: "Dbda",
-  nota_tot_exe: "Exe",
-  nota_tot_art: "Art",
+  nota_tot_dbda: "D",
+  nota_tot_exe: "E",
+  nota_tot_art: "A",
   nota_tot_ded: "Ded",
-  nota_final: "Nota",
+  nota_final: "Nota Final",
 };
 
 export const AparelhoLabels = {
@@ -25,4 +25,13 @@ export const AparelhoLabels = {
   FITA: "Fita",
   "MAOS LIVRES": "Mãos Livres",
   CORDA: "Corda",
+};
+
+export const AparelhoImgs = {
+  ARCO: "imgs/ARCO.png",
+  BOLA: "imgs/BOLA.jpeg",
+  MAÇAS: "imgs/MACAS.jpeg",
+  FITA: "imgs/FITA.jpeg",
+  "MAOS LIVRES": "imgs/MAOS_LIVRES.jpeg",
+  CORDA: "imgs/CORDA.jpeg",
 };
